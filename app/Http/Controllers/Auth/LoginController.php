@@ -32,10 +32,17 @@ class LoginController extends Controller
             // 4️⃣ Autenticación con guard Mongo
             Auth::guard('usuarios')->login($user);
 
-            return redirect()->intended('/libros/inicio');
+            // 5️⃣ Redirigir según el tipo de usuario
+            if ($user->user_tipo == 0) {
+                // Empleado
+                return redirect()->intended('/libros/inicio');
+            } else {
+                // Invitado (tipo 1)
+                return redirect()->intended('/inicio');
+            }
         }
 
-        // 5️⃣ Error
+        // 6️⃣ Error
         return back()->withErrors([
             'email' => 'Las credenciales no coinciden con nuestros registros.',
         ])->withInput();

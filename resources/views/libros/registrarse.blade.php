@@ -153,7 +153,7 @@
                     <div class="input-container">
                         <i class="fas fa-user-tag input-icon"></i>
                         <select id="user_tipo" name="user_tipo" class="form-control select-control" required>
-                            <option value="0">Administrador</option>
+                            <option value="0">Empleado</option>
                             <option value="1">Invitado</option>
                         </select>
                         <label for="user_tipo" class="select-label">Tipo de Usuario</label>
@@ -162,7 +162,7 @@
                         <div class="role-option" data-role="0">
                             <i class="fas fa-crown"></i>
                             <div>
-                                <strong>Administrador</strong>
+                                <strong>Empleado</strong>
                                 <span>Acceso completo al sistema</span>
                             </div>
                         </div>
@@ -251,7 +251,7 @@
                     <div class="type-card admin">
                         <i class="fas fa-crown"></i>
                         <div>
-                            <h5>Administrador</h5>
+                            <h5>Empleado</h5>
                             <ul>
                                 <li>Gestión completa de usuarios</li>
                                 <li>Control de inventario</li>

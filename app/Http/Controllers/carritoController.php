@@ -11,6 +11,16 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use MongoDB\BSON\ObjectId;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Controlador unificado de carrito para empleados e invitados
+ * 
+ * Este controlador maneja todas las operaciones del carrito de compras
+ * para ambos tipos de usuarios (empleado: tipo 0, invitado: tipo 1).
+ * 
+ * La diferencia principal es que detecta el tipo de usuario y:
+ * - Empleados: ven la vista 'carrito.ver' (con opción de mesa)
+ * - Invitados: ven la vista 'carrito.verInv' (sin opción de mesa)
+ */
 class CarritoController extends Controller
 {
     public function __construct()
@@ -86,7 +96,7 @@ class CarritoController extends Controller
     }
 
     /**
-     * Ver carrito
+     * Ver carrito (detecta tipo de usuario y redirige a la vista correspondiente)
      */
     public function ver()
     {
@@ -94,7 +104,14 @@ class CarritoController extends Controller
         $productos = Producto::all();
         $user = auth()->guard('usuarios')->user();
 
-        return view('carrito.ver', compact('carrito', 'productos', 'user'));
+        // Detectar tipo de usuario y redirigir a la vista correspondiente
+        if ($user->user_tipo == 0) {
+            // Empleado - vista con mesa
+            return view('carrito.ver', compact('carrito', 'productos', 'user'));
+        } else {
+            // Invitado - vista sin mesa
+            return view('carrito.verInv', compact('carrito', 'productos', 'user'));
+        }
     }
 
     /**
@@ -160,7 +177,7 @@ class CarritoController extends Controller
     }
 
     /**
-     * Mostrar página de pago
+     * Mostrar página de pago (detecta tipo de usuario)
      */
     public function mostrarPago()
     {

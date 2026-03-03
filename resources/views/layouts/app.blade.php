@@ -730,7 +730,7 @@
             }
         }
         if (empty($iniciales)) $iniciales = 'U';
-        $rol = ($usuario && $usuario->user_tipo == '0') ? 'Administrador' : 'Cliente';
+        $rol = ($usuario && $usuario->user_tipo == '0') ? 'Empleado' : 'Cliente';
         
         // Contar productos con bajo stock para el badge
         $bajo_stock_count = 0;
@@ -782,7 +782,7 @@
             <!-- Menú de navegación -->
             <div class="sidebar-menu">
                 @if ($usuario && $usuario->user_tipo == '0')
-                    <!-- Menú Administrador -->
+                    <!-- Menú Empleado -->
                     <a href="{{ URL('/libros/inicio') }}" class="menu-item {{ request()->is('libros/inicio') ? 'active' : '' }}">
                         <i class="fas fa-home"></i>
                         <span class="menu-text">Inicio</span>
@@ -796,7 +796,7 @@
                         <span class="menu-text">Ver Productos</span>
                     </a>
                     
-                    <!-- ===== NUEVA OPCIÓN DE INVENTARIO PARA ADMIN ===== -->
+                    <!-- ===== NUEVA OPCIÓN DE INVENTARIO PARA EMPLEADOS ===== -->
                     <a href="/inventario" class="menu-item {{ request()->is('inventario') ? 'active' : '' }}">
                         <i class="fas fa-warehouse"></i>
                         <span class="menu-text">Inventario</span>

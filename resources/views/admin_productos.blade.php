@@ -10,7 +10,7 @@
 
 <div class="container py-4">
 
-    <h1 class="text-center mb-4">Administrador de Productos</h1>
+    <h1 class="text-center mb-4">Gestor de Productos</h1>
 
     <!-- FORMULARIO DE PRODUCTOS -->
     <div class="card mb-4">

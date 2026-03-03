@@ -7,7 +7,7 @@
         <div class="header-content">
             <i class="fas fa-book-open"></i>
             <h1>Gestión de Menú</h1>
-            <p>Administra los productos disponibles en tu cafetería</p>
+            <p>Gestiona los productos disponibles en tu cafetería</p>
         </div>
         <div class="coffee-decoration">
             <div class="coffee-mug"></div>
