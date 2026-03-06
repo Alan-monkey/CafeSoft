@@ -18,6 +18,19 @@
                         <i class="fas fa-id-card me-2"></i>
                         {{ $user->user_tipo == '0' ? 'Empleado del Sistema' : 'Miembro Premium' }}
                     </div>
+                    
+                    @if($user->user_tipo == '1')
+                    <div class="puntos-badge">
+                        <div class="puntos-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="puntos-info">
+                            <span class="puntos-label">Tus Puntos</span>
+                            <span class="puntos-cantidad">{{ $user->puntos ?? 0 }}</span>
+                            <small class="puntos-equivalente">= ${{ $user->puntos ?? 0 }} en descuentos</small>
+                        </div>
+                    </div>
+                    @endif
                     @else
                     <div class="welcome-chip">
                         <i class="fas fa-seedling me-2"></i> Invitado
@@ -286,6 +299,52 @@
         border: 1px solid rgba(255, 215, 0, 0.4);
         margin-bottom: 2rem;
     }
+
+    /* Badge de Puntos */
+    .puntos-badge {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.15));
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 215, 0, 0.3);
+        border-radius: 20px;
+        padding: 1.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        transition: all 0.3s ease;
+        animation: pulseGlow 3s infinite;
+    }
+
+    .puntos-badge:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
+    }
+
+    @keyframes pulseGlow {
+        0%, 100% {
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+        50% {
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.4);
+        }
+    }
+
+    .puntos-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: #2c1a0b;
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        animation: rotate3d 4s infinite ease-in-out;
+    }
+
+ 
 
     .hero-description {
         font-size: 1.2rem;

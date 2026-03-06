@@ -94,6 +94,63 @@
                             </div>
                         </div>
 
+                        <!-- SECCIÓN DE PUNTOS -->
+                        @if($user->user_tipo == 1)
+                        <div class="puntos-container mb-4">
+                            <div class="puntos-header">
+                                <i class="fas fa-star"></i>
+                                <h5>Puntos de Recompensa</h5>
+                            </div>
+                            
+                            <div class="puntos-info">
+                                <div class="puntos-disponibles">
+                                    <span class="puntos-label">Puntos disponibles:</span>
+                                    <span class="puntos-valor">{{ $user->puntos ?? 0 }} pts</span>
+                                    <small class="puntos-equivalente">(= ${{ $user->puntos ?? 0 }})</small>
+                                </div>
+                                
+                                <div class="puntos-ganados-preview">
+                                    <i class="fas fa-gift"></i>
+                                    <span>Ganarás <strong id="puntosAGanar">{{ floor($total / 60) * 15 }}</strong> puntos con esta compra</span>
+                                </div>
+                            </div>
+                            
+                            @if(($user->puntos ?? 0) > 0)
+                            <div class="usar-puntos-section">
+                                <label class="form-label-modern">
+                                    <i class="fas fa-coins"></i> ¿Cuántos puntos quieres usar?
+                                </label>
+                                <div class="input-puntos-wrapper">
+                                    <input type="number" 
+                                           class="input-puntos" 
+                                           id="puntosAUsar" 
+                                           min="0" 
+                                           max="{{ min($user->puntos ?? 0, $total) }}"
+                                           value="0"
+                                           placeholder="0">
+                                    <button type="button" class="btn-usar-todos" onclick="usarTodosPuntos()">
+                                        Usar todos
+                                    </button>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Máximo: {{ min($user->puntos ?? 0, $total) }} puntos (1 punto = $1)
+                                </small>
+                                
+                                <div class="descuento-preview" id="descuentoPreview" style="display: none;">
+                                    <span>Descuento aplicado:</span>
+                                    <span class="descuento-monto">-$<span id="descuentoMonto">0</span></span>
+                                </div>
+                            </div>
+                            @else
+                            <div class="sin-puntos-mensaje">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Aún no tienes puntos. ¡Empieza a acumular con tus compras!</span>
+                            </div>
+                            @endif
+                        </div>
+                        @endif
+
                         <!-- NUEVO: Selector de Mesas -->
                         <div class="mesas-container mb-4">
                             <div class="mesas-header">
@@ -121,6 +178,9 @@
                         <form action="{{ route('carrito.procesar-pago') }}" method="POST" id="pagoForm">
                             @csrf
                             
+                            <!-- Campo oculto para puntos -->
+                            <input type="hidden" name="puntos_a_usar" id="puntosAUsarHidden" value="0">
+                            
                             <div class="form-group-modern">
                                 <label class="form-label-modern">
                                     <i class="fas fa-money-bill-wave"></i> Efectivo Recibido
@@ -131,7 +191,6 @@
                                            class="input-efectivo" 
                                            id="efectivoRecibido" 
                                            name="efectivo_recibido" 
-                                           required
                                            readonly
                                            value="0.00">
                                 </div>
@@ -818,6 +877,155 @@
         animation: mesaSeleccionada 0.5s ease;
     }
 
+    /* ===== PUNTOS DE RECOMPENSA ===== */
+    .puntos-container {
+        background: linear-gradient(145deg, #fff8e1, #ffecb3);
+        border-radius: 20px;
+        padding: 20px;
+        border: 2px solid #ffd54f;
+    }
+
+    .puntos-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ffd54f;
+    }
+
+    .puntos-header i {
+        color: #f57c00;
+        font-size: 1.5rem;
+    }
+
+    .puntos-header h5 {
+        margin: 0;
+        color: #e65100;
+        font-weight: 700;
+    }
+
+    .puntos-info {
+        margin-bottom: 15px;
+    }
+
+    .puntos-disponibles {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    .puntos-label {
+        color: #5D4037;
+        font-weight: 600;
+    }
+
+    .puntos-valor {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #f57c00;
+    }
+
+    .puntos-equivalente {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .puntos-ganados-preview {
+        background: rgba(255, 152, 0, 0.1);
+        padding: 10px 15px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #e65100;
+    }
+
+    .puntos-ganados-preview i {
+        font-size: 1.2rem;
+    }
+
+    .usar-puntos-section {
+        margin-top: 15px;
+    }
+
+    .input-puntos-wrapper {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .input-puntos {
+        flex: 1;
+        padding: 12px 15px;
+        border: 2px solid #ffd54f;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .input-puntos:focus {
+        outline: none;
+        border-color: #f57c00;
+        box-shadow: 0 0 0 3px rgba(245, 124, 0, 0.1);
+    }
+
+    .btn-usar-todos {
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #f57c00, #ff9800);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+
+    .btn-usar-todos:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(245, 124, 0, 0.3);
+    }
+
+    .descuento-preview {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        background: rgba(76, 175, 80, 0.1);
+        border-radius: 10px;
+        margin-top: 10px;
+        border: 2px solid #4caf50;
+    }
+
+    .descuento-preview span:first-child {
+        color: #2e7d32;
+        font-weight: 600;
+    }
+
+    .descuento-monto {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #4caf50;
+    }
+
+    .sin-puntos-mensaje {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+        background: rgba(158, 158, 158, 0.1);
+        border-radius: 10px;
+        color: #666;
+    }
+
+    .sin-puntos-mensaje i {
+        font-size: 1.2rem;
+    }
+
     /* ===== FORMULARIO ===== */
     .form-group-modern {
         margin-bottom: 25px;
@@ -1463,7 +1671,7 @@
 <script>
 let efectivoActual = 0;
 let mesaSeleccionada = null;
-const totalPagar = {{ $total }};
+let totalPagar = {{ $total }};
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', function() {
@@ -1499,11 +1707,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        if (efectivoActual >= totalPagar) {
+        // Permitir pago si el total final es 0 (pagado con puntos) o si el efectivo es suficiente
+        if (totalPagar <= 0 || efectivoActual >= totalPagar) {
             actualizarModal();
             new bootstrap.Modal(document.getElementById('confirmacionModal')).show();
         } else {
-            alert('El efectivo recibido es insuficiente');
+            alert('⚠️ FALTA EFECTIVO: $' + (totalPagar - efectivoActual).toFixed(2) + ' (Total a pagar: $' + totalPagar.toFixed(2) + ')');
         }
     });
 
@@ -1645,5 +1854,78 @@ function actualizarModal() {
     document.getElementById('modalEfectivo').textContent = efectivo.toFixed(2);
     document.getElementById('modalCambio').textContent = cambio.toFixed(2);
 }
+
+// ===== FUNCIONES PARA PUNTOS =====
+const totalOriginal = {{ $total }};
+let puntosDisponibles = {{ $user->puntos ?? 0 }};
+
+// Función para usar todos los puntos
+function usarTodosPuntos() {
+    const maxPuntos = Math.min(puntosDisponibles, totalOriginal);
+    document.getElementById('puntosAUsar').value = maxPuntos;
+    const hiddenInput = document.getElementById('puntosAUsarHidden');
+    if (hiddenInput) {
+        hiddenInput.value = maxPuntos;
+    }
+    actualizarDescuento();
+}
+
+// Actualizar descuento cuando cambian los puntos
+document.getElementById('puntosAUsar')?.addEventListener('input', function() {
+    // Sincronizar con el campo oculto del formulario
+    const hiddenInput = document.getElementById('puntosAUsarHidden');
+    if (hiddenInput) {
+        hiddenInput.value = this.value;
+    }
+    actualizarDescuento();
+});
+
+function actualizarDescuento() {
+    const puntosAUsar = parseFloat(document.getElementById('puntosAUsar').value) || 0;
+    const descuento = puntosAUsar;
+    const totalFinal = Math.max(0, totalOriginal - descuento);
+    
+    // Actualizar variable global totalPagar
+    totalPagar = totalFinal;
+    
+    // Mostrar descuento
+    if (puntosAUsar > 0) {
+        document.getElementById('descuentoPreview').style.display = 'flex';
+        document.getElementById('descuentoMonto').textContent = descuento.toFixed(2);
+        
+        // Actualizar total en el resumen
+        if (totalFinal <= 0) {
+            document.querySelector('.total-monto').innerHTML = 
+                `<span style="text-decoration: line-through; opacity: 0.5; font-size: 0.8em;">$${totalOriginal.toFixed(2)}</span> 
+                 <span style="color: #4caf50; font-weight: 700;">¡PAGADO CON PUNTOS!</span>`;
+        } else {
+            document.querySelector('.total-monto').innerHTML = 
+                `<span style="text-decoration: line-through; opacity: 0.5; font-size: 0.8em;">$${totalOriginal.toFixed(2)}</span> 
+                 $${totalFinal.toFixed(2)}`;
+        }
+    } else {
+        document.getElementById('descuentoPreview').style.display = 'none';
+        document.querySelector('.total-monto').textContent = `$${totalOriginal.toFixed(2)}`;
+    }
+    
+    // Actualizar puntos a ganar
+    const puntosAGanar = Math.floor(totalFinal / 60) * 15;
+    document.getElementById('puntosAGanar').textContent = puntosAGanar;
+    
+    // Actualizar modal
+    document.getElementById('modalTotal').textContent = totalFinal.toFixed(2);
+    
+    // Actualizar indicador de efectivo
+    const indicador = document.getElementById('efectivoIndicador');
+    const inputEfectivo = document.getElementById('efectivoRecibido');
+    if (totalFinal <= 0) {
+        indicador.innerHTML = '<i class="fas fa-check-circle"></i> <span style="color: #4caf50; font-weight: 600;">No necesitas agregar efectivo</span>';
+        inputEfectivo.removeAttribute('required');
+    } else {
+        indicador.innerHTML = '<i class="fas fa-info-circle"></i> <span>Ingresa el efectivo usando la calculadora</span>';
+        inputEfectivo.setAttribute('required', 'required');
+    }
+}
+
 </script>
 @endsection

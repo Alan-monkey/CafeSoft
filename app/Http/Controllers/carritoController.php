@@ -200,8 +200,9 @@ class CarritoController extends Controller
 {
     // Validar
     $request->validate([
-        'efectivo_recibido' => 'required|numeric|min:0',
-        'mesa' => 'required|integer|min:1|max:10'
+        'efectivo_recibido' => 'nullable|numeric|min:0',
+        'mesa' => 'required|integer|min:1|max:10',
+        'puntos_a_usar' => 'nullable|numeric|min:0'
     ]);
 
     $carrito = session()->get('carrito', []);
@@ -210,19 +211,47 @@ class CarritoController extends Controller
         return redirect()->back()->with('error', 'El carrito está vacío');
     }
 
+    //Calcular total inicial
     $total = 0;
     foreach ($carrito as $item) {
         $total += $item['precio'] * $item['cantidad'];
     }
 
-    $efectivoRecibido = floatval($request->efectivo_recibido);
-    $mesa = intval($request->mesa);
+    $usuario = auth()->guard('usuarios')->user();
+    $puntosAUsar = 0;
+    $descuento = 0;
 
-    if ($efectivoRecibido < $total) {
-        return redirect()->back()->with('error', 'El efectivo recibido es insuficiente');
+    if ($usuario && $usuario->user_tipo == 1) {
+        $puntosAUsar = floatval($request->input('puntos_a_usar', 0));
+        
+        //Validar que tenga puntos suficientes
+        if ($puntosAUsar > ($usuario->puntos ?? 0)){
+            return redirect()->back()->with('error', 'No tienes suficientes puntos');
+        }
+
+        //Validar que no use mas puntos del total
+        if ($puntosAUsar > $total) {
+            return redirect()->back()->with('error', 'No se puede usar mas puntos del total de la compra');
+        }
+
+        //Calcular descuento 
+        $descuento = $puntosAUsar;
+    } elseif ($request->input('puntos_a_usar', 0) > 0) {
+        return redirect()->back()->with('error', 'Solo los clientes pueden usar puntos');
     }
 
-    $cambio = $efectivoRecibido - $total;
+    //Calcular el total con descuento
+    $totalFinal = $total - $descuento;
+
+    $efectivoRecibido = floatval($request->efectivo_recibido ?? 0);
+    $mesa = intval($request->mesa);
+
+    // Validar efectivo: si el total final es 0 (pagado completamente con puntos), no se requiere efectivo
+    if ($totalFinal > 0 && $efectivoRecibido < $totalFinal) {
+        return redirect()->back()->with('error', 'El efectivo recibido es insuficiente. Faltan $' . number_format($totalFinal - $efectivoRecibido, 2));
+    }
+
+    $cambio = $efectivoRecibido - $totalFinal;
 
     // PASO 1: Verificar que podemos encontrar los inventarios
     foreach ($carrito as $item) {
@@ -260,7 +289,10 @@ class CarritoController extends Controller
                 'subtotal' => $item['precio'] * $item['cantidad']
             ];
         }, $carrito);
-        $venta->total = $total;
+        $venta->total = $totalFinal;
+        $venta->subtotal = $total;
+        $venta->descuento_puntos = $descuento;
+        $venta->puntos_usados = $puntosAUsar;
         $venta->efectivo_recibido = $efectivoRecibido;
         $venta->cambio = $cambio;
         $venta->mesa = $mesa;
@@ -279,6 +311,23 @@ class CarritoController extends Controller
         $ventaGuardada = Venta::find($venta->_id);
         if (!$ventaGuardada) {
             return redirect()->back()->with('error', 'La venta no se encontró después de guardar');
+        }
+
+        //Solo para clientes
+        $usuario = auth()->guard('usuarios')->user();
+
+        if ($usuario && $usuario->user_tipo == 1){
+
+            $usuario->puntos -= $puntosAUsar;
+            //Calcular los puntos
+            $puntosGanados = floor($totalFinal / 60) * 15;
+            $usuario->puntos += $puntosGanados;
+
+            $usuario->save();
+
+            //Actualizar puntos
+            $venta->puntos_ganados = $puntosGanados;
+            $venta->save();
         }
 
         // PASO 4: Actualizar inventario
@@ -302,7 +351,7 @@ class CarritoController extends Controller
         }
 
         // Guardar datos en sesión
-        session()->put('pago_total', $total);
+        session()->put('pago_total', $totalFinal);
         session()->put('pago_efectivo', $efectivoRecibido);
         session()->put('pago_cambio', $cambio);
         session()->put('pago_fecha', now());

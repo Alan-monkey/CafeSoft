@@ -28,7 +28,8 @@ class Usuarios extends Model implements Authenticatable
         'telefono',
         'user_tipo',
         'reset_token',
-        'reset_token_expires_at'
+        'reset_token_expires_at',
+        'puntos'
     ];
 
     protected $hidden = [

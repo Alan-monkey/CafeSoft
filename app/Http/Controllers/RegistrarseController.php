@@ -36,6 +36,8 @@ class RegistrarseController extends Controller
             'direccion' => $request->direccion,
             'telefono' => $request->telefono,
             'user_tipo' => $request->user_tipo,
+            'puntos' => 0,
+            'tipo_usuario' => 'cliente'
         ]);
 
         return redirect()->back()->with('success', 'Usuario registrado correctamente');
