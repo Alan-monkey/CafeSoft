@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Usuarios;
+use App\Services\PythonApiService;
 
 class LoginController extends Controller
 {
+    protected $pythonApi;
+
+    public function __construct(PythonApiService $pythonApi)
+    {
+        $this->pythonApi = $pythonApi;
+    }
+
     public function showLoginForm()
     {
         return view('auth.login');
@@ -17,44 +25,42 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        // 1️⃣ Validación básica
         $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        // 2️⃣ Buscar usuario en MongoDB
-        $user = Usuarios::where('email', $request->email)->first();
+        $response = $this->pythonApi->getUsuarioByEmail($request->email);
 
-        // 3️⃣ Verificar contraseña
-        if ($user && Hash::check($request->password, $user->password)) {
-
-            // 4️⃣ Autenticación con guard Mongo
-            Auth::guard('usuarios')->login($user);
-
-            // 5️⃣ Redirigir según el tipo de usuario
-            if ($user->user_tipo == 0) {
-                // Empleado
-                return redirect()->intended('/libros/inicio');
-            } else {
-                // Invitado (tipo 1)
-                return redirect()->intended('/inicio');
-            }
+        if (!$response['success'] || !$response['data']) {
+            return back()->withErrors(['email' => 'Las credenciales no coinciden con nuestros registros.'])->withInput();
         }
 
-        // 6️⃣ Error
-        return back()->withErrors([
-            'email' => 'Las credenciales no coinciden con nuestros registros.',
-        ])->withInput();
+        $userData = $response['data'];
+
+        if (!Hash::check($request->password, $userData['password'])) {
+            return back()->withErrors(['email' => 'Las credenciales no coinciden con nuestros registros.'])->withInput();
+        }
+
+        // Crear instancia del modelo para el guard de Laravel
+        $user = new Usuarios();
+        $user->forceFill($userData);
+        $user->exists = true;
+
+        Auth::guard('usuarios')->login($user);
+
+        if ($user->user_tipo == 0) {
+            return redirect()->intended('/libros/inicio');
+        } else {
+            return redirect()->intended('/inicio');
+        }
     }
 
     public function logout(Request $request)
     {
         Auth::guard('usuarios')->logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return redirect('/login');
     }
 }

@@ -791,6 +791,10 @@
                         <i class="fas fa-plus-circle"></i>
                         <span class="menu-text">Crear Producto</span>
                     </a>
+                    <a href="{{ route('ventas.index') }}" class="menu-item {{ request()->is('ventas') ? 'active' : '' }}">
+    <i class="fas fa-receipt"></i>
+    <span class="menu-text">Ver Ventas</span>
+</a>
                     <a href="/productos/leer" class="menu-item {{ request()->is('productos/leer') ? 'active' : '' }}">
                         <i class="fas fa-list"></i>
                         <span class="menu-text">Ver Productos</span>

@@ -153,8 +153,8 @@
                     <div class="input-container">
                         <i class="fas fa-user-tag input-icon"></i>
                         <select id="user_tipo" name="user_tipo" class="form-control select-control" required>
-                            <option value="0">Empleado</option>
-                            <option value="1">Invitado</option>
+                            <option value="0">Administrador</option>
+                            <option value="1">Cliente</option>
                         </select>
                         <label for="user_tipo" class="select-label">Tipo de Usuario</label>
                     </div>
@@ -162,14 +162,14 @@
                         <div class="role-option" data-role="0">
                             <i class="fas fa-crown"></i>
                             <div>
-                                <strong>Empleado</strong>
+                                <strong>Administrador</strong>
                                 <span>Acceso completo al sistema</span>
                             </div>
                         </div>
                         <div class="role-option" data-role="1">
                             <i class="fas fa-user"></i>
                             <div>
-                                <strong>Invitado</strong>
+                                <strong>Cliente</strong>
                                 <span>Acceso limitado a funciones básicas</span>
                             </div>
                         </div>
@@ -251,7 +251,7 @@
                     <div class="type-card admin">
                         <i class="fas fa-crown"></i>
                         <div>
-                            <h5>Empleado</h5>
+                            <h5>Administrador</h5>
                             <ul>
                                 <li>Gestión completa de usuarios</li>
                                 <li>Control de inventario</li>
@@ -263,7 +263,7 @@
                     <div class="type-card guest">
                         <i class="fas fa-user"></i>
                         <div>
-                            <h5>Invitado</h5>
+                            <h5>Cliente</h5>
                             <ul>
                                 <li>Consulta de productos</li>
                                 <li>Realización de pedidos</li>

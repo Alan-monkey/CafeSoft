@@ -85,9 +85,9 @@ Route::middleware(['auth:usuarios', 'check.user.type:0'])->group(function () {
     
     // Rutas de ventas (solo empleados)
     Route::get('/ventas', [App\Http\Controllers\VentasController::class, 'index'])->name('ventas.index');
-    Route::get('/ventas/{id}', [App\Http\Controllers\VentasController::class, 'show'])->name('ventas.show');
-    Route::get('/ventas/mesas/disponibles', [App\Http\Controllers\VentasController::class, 'mesasDisponibles'])->name('ventas.mesas.disponibles');
     Route::get('/ventas/reportes', [App\Http\Controllers\VentasController::class, 'reportes'])->name('ventas.reportes');
+    Route::get('/ventas/mesas/disponibles', [App\Http\Controllers\VentasController::class, 'mesasDisponibles'])->name('ventas.mesas.disponibles');
+    Route::get('/ventas/{id}', [App\Http\Controllers\VentasController::class, 'show'])->name('ventas.show');
     
     // Rutas de registro (solo empleados)
     Route::get('/libros/registrarse', [RegistrarseController::class, 'registrarse'])->name('libros.registrarse');

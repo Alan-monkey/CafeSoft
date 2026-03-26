@@ -106,9 +106,9 @@
                                 <div class="productos-grid">
                                     @foreach($productos as $producto)
                                         @php
-                                            $inventario = \App\Models\Inventario::where('producto_id', $producto->_id)->first();
-                                            $stock = $inventario ? $inventario->stock_actual : 0;
+                                            $stock = $producto->stock ?? 0;
                                         @endphp
+
                                         
                                         @if($stock > 0)
                                             <div class="producto-card-sugerido">
@@ -279,12 +279,10 @@
                                 <div class="productos-grid-mini">
                                     @foreach($productos as $producto)
                                         @php
-                                            // Verificar si ya está en el carrito
                                             $enCarrito = isset($carrito[$producto->_id]);
-                                            // Obtener inventario
-                                            $inventario = \App\Models\Inventario::where('producto_id', $producto->_id)->first();
-                                            $stock = $inventario ? $inventario->stock_actual : 0;
+                                            $stock = $producto->stock ?? 0;
                                         @endphp
+
                                         
                                         @if(!$enCarrito && $stock > 0)
                                             <div class="producto-mini-card">

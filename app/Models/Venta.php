@@ -23,7 +23,6 @@ class Venta extends Model
     ];
 
     protected $casts = [
-        'productos' => 'array',
         'fecha_venta' => 'datetime'
     ];
 

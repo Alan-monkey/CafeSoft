@@ -16,7 +16,7 @@
                     <h1 class="hero-title">{{ $user->nombre }}</h1>
                     <div class="hero-role-badge">
                         <i class="fas fa-id-card me-2"></i>
-                        {{ $user->user_tipo == '0' ? 'Empleado del Sistema' : 'Miembro Premium' }}
+                        {{ $user->user_tipo == '0' ? 'Administrador del Sistema' : 'Miembro Premium' }}
                     </div>
                     @else
                     <div class="welcome-chip">
@@ -41,15 +41,15 @@
                     <div class="coffee-showcase">
                         <div class="floating-card card-1">
                             <i class="fas fa-chart-line"></i>
-                            <span>+45% ventas</span>
+                            <span>${{ number_format($totalHoy, 0) }}</span> <!-- Total ventas hoy -->
                         </div>
                         <div class="floating-card card-2">
-                            <i class="fas fa-users"></i>
-                            <span>128 clientes</span>
+                            <i class="fas fa-receipt"></i>
+                            <span>{{ $numVentasHoy }} tickets</span> <!-- Número de ventas -->
                         </div>
                         <div class="floating-card card-3">
-                            <i class="fas fa-clock"></i>
-                            <span>tiempo real</span>
+                            <i class="fas fa-crown"></i>
+                            <span>{{ $masVendidos ? array_key_first($masVendidos) : 'Sin ventas' }}</span> <!-- Producto top -->
                         </div>
                         <div class="main-cup">
                             <div class="steam-animation"></div>
@@ -69,31 +69,31 @@
         </div>
     </div>
 
-    <!-- Sección Métricas / Stats -->
+    <!-- Sección Métricas / Stats con datos reales -->
     <div class="metrics-section">
         <div class="container">
             <div class="metrics-grid">
                 <div class="metric-item">
-                    <div class="metric-value">150+</div>
-                    <div class="metric-label">Cafeterías activas</div>
+                    <div class="metric-value">${{ number_format($totalHoy, 0) }}</div>
+                    <div class="metric-label">Ventas hoy</div>
                 </div>
                 <div class="metric-item">
-                    <div class="metric-value">12k</div>
-                    <div class="metric-label">Pedidos gestionados</div>
+                    <div class="metric-value">{{ $numVentasHoy }}</div>
+                    <div class="metric-label">Tickets hoy</div>
                 </div>
                 <div class="metric-item">
-                    <div class="metric-value">99.9%</div>
-                    <div class="metric-label">Uptime garantizado</div>
+                    <div class="metric-value">${{ number_format($promedioHoy, 0) }}</div>
+                    <div class="metric-label">Ticket promedio</div>
                 </div>
                 <div class="metric-item">
-                    <div class="metric-value">24/7</div>
-                    <div class="metric-label">Soporte técnico</div>
+                    <div class="metric-value">{{ $masVendidos ? array_key_first($masVendidos) : '—' }}</div>
+                    <div class="metric-label">Producto top</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Core Features - Premium Cards -->
+    <!-- Core Features - Premium Cards (se mantienen igual) -->
     <div class="features-premium">
         <div class="container">
             <div class="section-header">
@@ -136,7 +136,7 @@
         </div>
     </div>
 
-    <!-- Showcase Visual - Galería Profesional -->
+    <!-- Showcase Visual - Galería Profesional (se mantiene igual) -->
     <div class="showcase-moderno">
         <div class="container">
             <div class="row align-items-center">
@@ -166,25 +166,56 @@
                                 <span>Analytics</span>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CTA Final con modal incluido -->
+    <!-- NUEVA SECCIÓN: Gráfico de productos más vendidos -->
+    <div class="features-premium" style="padding-top: 0;">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Lo más vendido hoy</span>
+                <h2 class="section-title-modern">Top <span class="text-gradient">5 productos</span></h2>
+                <p class="section-subtitle-modern">Los favoritos de tus clientes este día</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="feature-card-premium" style="padding: 2rem;">
+                        @if(count($masVendidos) > 0)
+                            <div style="position: relative; height: 300px; width: 100%;">
+                                <canvas id="graficaProductos"></canvas>
+                            </div>
+                            <div class="mt-4">
+                                @foreach($masVendidos as $nombre => $cantidad)
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span><i class="fas fa-coffee me-2" style="color: #8B4513;"></i>{{ $nombre }}</span>
+                                        <span class="badge" style="background: #D4AF37; color: #2c1a0b;">{{ $cantidad }} vendidos</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-center text-muted my-5">No hay ventas registradas hoy.</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Final (se mantiene igual) -->
     <div class="cta-final">
         <div class="container">
             <div class="cta-card">
                 <h2>¿Listo para transformar tu cafetería?</h2>
                 <p>Únete a cientos de dueños que ya confían en CoffeSoft</p>
-                
+                <!-- Eliminado el botón que no hacía nada -->
             </div>
         </div>
     </div>
 
-    <!-- Modal Mejorado -->
+    <!-- Modal Mejorado (se mantiene igual) -->
     <div class="modal fade premium-modal" id="backupModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -215,8 +246,53 @@
     </div>
 </div>
 
+<!-- Script para el gráfico -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(count($masVendidos) > 0)
+        const ctx = document.getElementById('graficaProductos').getContext('2d');
+        const nombres = {!! json_encode(array_keys($masVendidos)) !!};
+        const cantidades = {!! json_encode(array_values($masVendidos)) !!};
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: nombres,
+                datasets: [{
+                    data: cantidades,
+                    backgroundColor: [
+                        '#8B4513', // Café Oscuro
+                        '#D2691E', // Chocolate
+                        '#D4AF37', // Dorado
+                        '#A0522D', // Sienna
+                        '#5D4037'  // Marrón
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: { size: 12 }
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+        @endif
+    });
+</script>
+
 <style>
-    /* ===== ESTILOS PREMIUM ===== */
+    /* ===== ESTILOS PREMIUM (se mantienen igual, solo agrego uno nuevo) ===== */
     .coffee-master {
         background: #faf7f2;
         overflow-x: hidden;
